@@ -1,6 +1,6 @@
-// MPU6050 register-level test on ESP32 (no library).
+// MPU6050 / MPU6500 register-level test on ESP32 (no library).
 // Prints ax,ay,az,gx,gy,gz as CSV at 50 Hz. Accel in g, gyro in deg/s.
-// Wiring: VCC->3V3, GND->GND, SCL->GPIO22, SDA->GPIO21
+// Wiring: VCC->3V3, GND->GND, SCL->GPIO22, SDA->GPIO23
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -29,15 +29,17 @@ static uint8_t readReg(uint8_t reg) {
 
 void setup() {
   Serial.begin(115200);
-  Wire.begin(21, 22);        // SDA, SCL
+  Wire.begin(23, 22);        // SDA, SCL
   Wire.setClock(400000);
 
   delay(100);
+  // WHO_AM_I: 0x68 = MPU6050, 0x70 = MPU6500, 0x71 = MPU9250 (same accel/gyro registers)
   uint8_t id = readReg(REG_WHO_AM_I);
-  if (id != 0x68) {
-    Serial.printf("MPU6050 not found, WHO_AM_I=0x%02X. Check wiring.\n", id);
+  if (id != 0x68 && id != 0x70 && id != 0x71) {
+    Serial.printf("IMU not found, WHO_AM_I=0x%02X. Check wiring.\n", id);
     while (true) delay(1000);
   }
+  Serial.printf("# IMU detected, WHO_AM_I=0x%02X\n", id);
   writeReg(REG_PWR_MGMT1, 0x00);   // wake up, internal 8 MHz clock
   delay(50);
   Serial.println("ax,ay,az,gx,gy,gz");
