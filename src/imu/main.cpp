@@ -39,10 +39,9 @@ void setup() {
     Serial.printf("IMU not found, WHO_AM_I=0x%02X. Check wiring.\n", id);
     while (true) delay(1000);
   }
-  Serial.printf("# IMU detected, WHO_AM_I=0x%02X\n", id);
   writeReg(REG_PWR_MGMT1, 0x00);   // wake up, internal 8 MHz clock
   delay(50);
-  Serial.println("ax,ay,az,gx,gy,gz");
+  // No header line: the Edge Impulse data forwarder expects numeric CSV only.
 }
 
 void loop() {
